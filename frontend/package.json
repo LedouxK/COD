@@ -1,0 +1,65 @@
+{
+  "name": "frontend",
+  "version": "0.1.0",
+  "private": true,
+  "dependencies": {
+    "@radix-ui/react-dialog": "^1.1.14",
+    "@radix-ui/react-slot": "^1.2.3",
+    "@testing-library/dom": "^10.4.0",
+    "@testing-library/jest-dom": "^6.6.3",
+    "@testing-library/react": "^16.3.0",
+    "@testing-library/user-event": "^13.5.0",
+    "axios": "^1.10.0",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "lucide-react": "^0.525.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-router-dom": "^7.6.3",
+    "react-scripts": "5.0.1",
+    "socket.io-client": "^4.8.1",
+    "tailwind-merge": "^3.3.1",
+    "web-vitals": "^2.1.4"
+  },
+  "scripts": {
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "test": "react-scripts test",
+    "eject": "react-scripts eject",
+    "cypress:open": "cypress open",
+    "cypress:run": "cypress run --env allure=true",
+    "test:allure": "cd .. && docker-compose run --rm cypress-auto",
+    "test:e2e": "start-server-and-test start 3000 cypress:run",
+    "allure:generate": "allure generate cypress/reports/allure-results --clean -o cypress/reports/allure-report",
+    "allure:open": "allure open cypress/reports/allure-report",
+    "allure:report": "npm run allure:generate && npm run allure:open"
+  },
+  "eslintConfig": {
+    "extends": [
+      "react-app",
+      "react-app/jest"
+    ]
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.54.1",
+    "@tailwindcss/postcss": "^4.1.11",
+    "allure-commandline": "^2.34.1",
+    "allure-playwright": "^3.3.1",
+    "autoprefixer": "^10.4.21",
+    "postcss": "^8.5.6",
+    "start-server-and-test": "^2.0.12",
+    "tailwindcss": "^4.1.11"
+  }
+}
