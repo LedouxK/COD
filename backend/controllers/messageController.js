@@ -1,5 +1,18 @@
 const Message = require('../models/Message');
 
+/**
+ * Helper to convert a Message mongoose document to the API response shape
+ * Only exposes the id, content, user and createdAt fields.
+ * @param {object} messageDoc - Mongoose document
+ * @returns {{id: string, content: string, user: any, createdAt: Date}}
+ */
+const formatMessageForResponse = (messageDoc) => ({
+  id: messageDoc._id.toString(),
+  content: messageDoc.content,
+  user: messageDoc.user,
+  createdAt: messageDoc.createdAt
+});
+
 
 /**
  * Contrôleur pour créer un nouveau message
