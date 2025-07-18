@@ -1,0 +1,132 @@
+version: '3'
+
+services:
+  # Service API Node.js
+  api:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - MONGO_URI=mongodb://mongo:27017/chat
+      - JWT_SECRET=chat_app_secret_key_2025
+      - PORT=3000
+    depends_on:
+      - mongo
+    restart: unless-stopped
+    networks:
+      - app-network
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:3000 || exit 0"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
+
+  # Service Frontend React
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "3001:80"
+    depends_on:
+      api:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - app-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
+
+  # Service MongoDB
+  mongo:
+    image: mongo:latest
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+    restart: unless-stopped
+    networks:
+      - app-network
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
+
+  # Service Playwright pour les tests E2E (mode headless/CI)
+  # playwright:
+  #   build:
+  #     context: ./frontend
+  #     dockerfile: Dockerfile.playwright
+  #   depends_on:
+  #     frontend:
+  #       condition: service_healthy
+  #     api:
+  #       condition: service_healthy
+  #   environment:
+  #     - BASE_URL=http://frontend:80
+  #     - API_URL=http://api:3000/api
+  #   volumes:
+  #     - ./frontend:/app
+  #     - ./frontend/node_modules:/app/node_modules
+  #     - ./frontend/playwright-results:/app/playwright-results
+  #     - ./frontend/allure-results:/app/allure-results
+  #   networks:
+  #     - app-network
+  #   # Par défaut, exécute tous les tests
+  #   command: ["npx", "playwright", "test"]
+
+  # Service Playwright pour le mode UI interactif
+  # playwright-ui:
+  #   build:
+  #     context: ./frontend
+  #     dockerfile: Dockerfile.playwright
+  #   depends_on:
+  #     frontend:
+  #       condition: service_healthy
+  #     api:
+  #       condition: service_healthy
+  #   environment:
+  #     - BASE_URL=http://frontend:80
+  #     - API_URL=http://api:3000/api
+  #   volumes:
+  #     - ./frontend:/app
+  #     - ./frontend/node_modules:/app/node_modules
+  #     - ./frontend/playwright-results:/app/playwright-results
+  #     - /tmp/.X11-unix:/tmp/.X11-unix
+  #   networks:
+  #     - app-network
+  #   command: ["npx", "playwright", "test", "--ui"]
+
+  # Service Allure pour les rapports de test
+  # allure:
+  #   image: frankescobar/allure-docker-service
+  #   ports:
+  #     - "5051:5050"
+  #   volumes:
+  #     - ./frontend/allure-results:/app/allure-results
+  #     - ./frontend/allure-reports:/app/default-reports
+  #   environment:
+  #     CHECK_RESULTS_EVERY_SECONDS: 3
+  #     KEEP_HISTORY: 1
+  #   networks:
+  #     - app-network
+
+# Définition des volumes persistants
+volumes:
+  mongo-data:
+    driver: local
+
+# Définition du réseau partagé
+networks:
+  app-network:
+    driver: bridge
